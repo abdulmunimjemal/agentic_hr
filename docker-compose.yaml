@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  interview_backend:
+    build: ./services/interview_ai/backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+      - redis
+      - notification
+    environment:
+      MONGO_URI: "mongodb://mongo:27017/"
+      MONGO_DB: "interview_db"
+      REDIS_URI: "redis://redis:6379"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      MODEL: "${MODEL}"
+      NOTIFICATION_SERVICE_URL: "http://notification:8000"  # Notification service URL
+    networks:
+      - app_network
+
+  interview_frontend:
+    build: ./services/interview_ai/frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:8080/api/v1"  # Client-side access via host port
+    networks:
+      - app_network
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/mongo:/data/db
+    networks:
+      - app_network
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+  notification:
+    build: ./services/notification
+    ports:
+      - "8000:8000"  # Expose notification service port
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge

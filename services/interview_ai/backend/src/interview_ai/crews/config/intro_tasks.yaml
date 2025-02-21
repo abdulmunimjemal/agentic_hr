@@ -1,0 +1,32 @@
+welcome_task:
+  description: >
+    Create a personalized welcome message that includes:
+      - The candidate's name (from User Info)
+      - The job title (from Job Title)
+      - A friendly greeting and a brief explanation of the interview's purpose and procedure
+      - At the end, ask the usual tell me about yourself question
+
+    Note:
+      - The message is meant for a live interview interface, not as an email.
+      - The provided candidate info and job title will be inserted where indicated.
+      - Don't feel obligated to use all the provided information in the message.
+      - Make sure it sounds like a friendly, human greeting, not a robotic message.
+      - The message should be concise and to the point.
+    
+    User Info:
+      {user_info}
+    
+    Job Title:
+      {role_info}
+
+  expected_output: >
+    The output should be a JSON object with the following structure:
+    
+    {
+      "state": "welcome",
+      "text": "Personalized welcome message."
+    }
+    
+    without the "```json" tag at the beginning and end.
+
+  agent: welcome_agent

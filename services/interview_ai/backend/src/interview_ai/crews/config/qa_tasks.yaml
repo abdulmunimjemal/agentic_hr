@@ -1,0 +1,106 @@
+
+question_generation_task:
+  description: >
+    Generate a personalized, ongoing response containing one question for the candidate.
+    Your task is to choose a single skill from the provided skills dictionary that has fewer than 3 questions asked so far.
+    If more than one skill qualifies, select the one with the lowest count.
+    The new question should be directly related to this skill and presented in a natural, conversational tone.
+    Briefly acknowledge the previous answer if needed—do not over-reference it—and avoid unnecessary details.
+    Use the latest Skills Dictionary from the Answer Evaluation Task output.
+
+
+    Reference for you:
+      User Info:
+        {user_info}
+      Job Title:
+        {role_info}
+      Recent Conversation History:
+        {conversation_history}
+
+  expected_output: >
+    An "ongoing" state response containing a question for the candidate.
+    Expected Output format:
+
+    {
+      "state": "ongoing",
+      "text": "A personalized question for the candidate.",
+      "skills": "The same as your input"
+    }
+
+    The output must strictly adhere to the JSON format above.
+    Do not include any additional text, such as "```json" or markdown formatting.
+    Ensure all commas, brackets, and quotes are correctly placed to avoid parsing errors.
+    The "skills" field must match the input provided.
+
+    FORMAT RULES:
+    - Strict JSON compliance
+    - No markdown/backticks
+    - No omitted skills
+    
+  agent: question_generator
+
+
+answer_evaluation_task:
+  description: >
+    Evaluate the user's answer with objectivity and precision. Update the skills dictionary accordingly by assessing whether the answer provides specific, relevant evidence of expertise aligned with the job's requirements. In your evaluation, ensure that general or vague answers do not receive a high score.
+
+    For each skill in the skills dictionary, compare the user's answer against the required level of expertise. Use the following criteria to assign a score:
+    
+    1. 1-3: Poor  
+       - The answer is minimal, vague, or off-topic, showing little to no evidence of the required skill.
+    
+    2. 4-6: Average  
+       - The answer contains some relevant points but remains generic or lacks depth and detailed examples.
+    
+    3. 7-9: Good  
+       - The answer is specific, detailed, and demonstrates a solid understanding of the skill, with clear examples or reasoning.
+    
+    4. 10: Excellent match for the job  
+       - The answer is highly specific, thoroughly detailed, and directly addresses the required skill with concrete evidence and examples.
+
+    Emphasize consistency by focusing on clarity, specificity, and relevance. Ensure that any high rating is only given when the answer explicitly addresses the required expertise rather than generic statements.
+
+    Recent Conversation History:
+      {conversation_history}
+
+    User Answer:
+      {user_answer}
+    
+    Skills Dictionary:
+      {skills}
+
+    Special Rule: If the user admits he has no experience in a particular skill, assign a score of 1-3 and increment the number of questions asked for that skill by three.
+
+    WARNING: DON'T ADD ANY ADDITIONAL SKILL NOT PRESENT IN THE SKILLS DICTIONARY! ONLY EVALUATE THOSE PRESENT IN THE SKILLS DICTIONARY.
+    UPDATE ONLY THE SKILLS RELATED TO THE ANSWER PROVIDED BY THE USER AND THE QUESTION ASKED. DO NOT UPDATE THE WHOLE SKILLS DICTIONARY.
+    INCREMENT THE NUMBER OF QUESTIONS ASKED FOR THE SKILL BY ONE.
+  
+  expected_output: >
+    An updated skills dictionary (JSON).
+
+    Expected Output format:
+          {
+            "skills": {
+              "skill_1": {
+                "score": (updated integer),
+                "required_level": "(unchanged string)",
+                "number_of_questions": (incremented integer),
+              },
+              // ALL original skills must appear here
+            }
+          }
+
+    CONSTRAINTS:
+    !!! CRITICAL !!!
+    - Preservation: Maintain original skill names/keys
+    - Completeness: Output ALL skills regardless of updates
+    - Specificity: Require direct evidence for scores ≥7
+
+    FORMAT RULES:
+    - Strict JSON compliance
+    - No markdown/backticks
+    - No omitted skills
+
+  agent: answer_evaluator
+
+

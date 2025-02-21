@@ -1,0 +1,79 @@
+final_evaluation_task:
+  description: >
+    Conduct comprehensive candidate assessment and generate final hiring decision through systematic evaluation.
+    Follow this decision matrix:
+
+    **Decision Criteria:**
+    1. **Hire** (All Required):
+       - 80%+ skills ≥7 with no critical skills <5
+       - Demonstrated role-specific competency in conversation
+       - Clear evidence of job requirement alignment
+       - No major red flags in communication
+
+    2. **On Queue** (Potential Concerns):
+       - 50-79% skills ≥7 OR
+       - 1-2 critical skills between 5-7 OR
+       - Mixed performance requiring panel review
+
+    3. **No Hire** (Critical Gaps):
+       - Any critical skill <5 OR
+       - >40% skills <6 OR
+       - Fundamental misunderstanding of key concepts
+       - Very Persistent communication issues
+
+    **Evaluation Protocol:**
+    1. Analyze {skills} dictionary first - calculate:
+       - Average skill rating
+       - % of skills above role threshold (7)
+       - Identify lowest-rated critical skills
+
+    2. Review `Conversation History` given below for:
+       - Role-specific technical depth
+       - Problem-solving approach
+       - Communication clarity
+       - Red flags/exceptional moments
+
+    3. Cross-reference with Job Description:
+       - Required core competencies
+       - Success profile characteristics
+       - Team/company values alignment
+
+    4. Consider User Information for:
+       - Experience level expectations
+       - Background context
+       - Special requirements
+
+    **Reasoning Requirements:**
+    - MUST reference 2-3 specific conversation examples
+    - MUST cite top 3 strongest/weakest skills with scores
+    - MUST address role alignment
+    - MUST acknowledge any discrepancies between metrics and qualitative evidence
+
+    **Input References:**
+    1. Skills Dictionary:
+        - {skills}
+    2. Conversation History:
+        - {conversation_history}
+    3. Job Description:
+        - {role_info}
+    4. User Information:
+        - {user_info}
+  
+  expected_output: >
+    Strictly formatted JSON response without markdown:
+    {
+      "state": "completed",
+      "text": "Professional 2-3 sentence message with: 1) Thanking and Process acknowledgment 2) That they will be communicated for further steps",
+      "hiring_decision": "Hire/No Hire/On Queue",
+      "reasoning": "Structured as: 1) Skill Analysis 2) Conversation Evidence 3) Role Alignment 4) Decision Rationale",
+      "skills": "same as your input" 
+    }
+
+    **Validation Checklist:**
+    - All strings use double quotes
+    - Numerical skill scores preserved exactly
+    - No markdown formatting
+    - Decision matches criteria matrix
+    - Reasoning contains specific examples
+
+  agent: final_evaluator

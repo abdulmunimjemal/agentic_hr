@@ -3,3 +3,5 @@ uvicorn
 python-dotenv
 pytest
 pydantic[email]
+celery
+jinja2

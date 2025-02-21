@@ -1,15 +1,7 @@
 import smtplib
 import ssl
 from email.message import EmailMessage
-import os
-# from app.config import settings
-
-class settings:
-    SMTP_HOST: str = "smtp.gmail.com"
-    SMTP_PORT: int = 587
-    SMTP_USER: str = "abdulmunim.jundurahman@aait.edu.et"
-    SMTP_PASS: str = "Munimpro1!"
-    SENDER_EMAIL: str = "abdulmunim.jundurahman@aait.edu.et"
+from app.config import settings
 
 def send_email_notification(to: str, subject: str, body: str = "", html: str = ""):
     """
@@ -38,6 +30,7 @@ def send_email_notification(to: str, subject: str, body: str = "", html: str = "
             server.login(settings.SMTP_USER, settings.SMTP_PASS)
             print("Sending email...")
             server.send_message(msg)
+            print("Email sent.")
         return True
     except Exception as e:
         # Logging, retries, etc. could be handled here

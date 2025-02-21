@@ -2,7 +2,7 @@
 
 from typing import List, Dict
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 
 class RequiredLevel(str, Enum):
@@ -25,6 +25,8 @@ class SessionData(BaseModel):
     role_info: str
     user_answer: str = ""
     interview_id: str = ""
+    user_email: EmailStr = ""
+    name: str = ""
 
 class ChatState(str, Enum):
     welcome = "welcome"
@@ -44,8 +46,11 @@ class ChatResponse(BaseModel):
 
 
 class ScheduleRequest(BaseModel):
+    name: str
     user_info: str
+    user_email: EmailStr
     role_info: str
+    job_title: str
     # The input skills dict only provides 'required_level' for each skill.
     # Example:
     # {
@@ -59,3 +64,9 @@ class ScheduleResponse(BaseModel):
     success: bool
     interview_id: str = None
     error: str = None
+
+class EmailType(str, Enum):
+    interview_scheduled = "interview_scheduled"
+    interview_completed = "interview_completed"
+    text = "text"
+

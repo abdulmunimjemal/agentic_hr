@@ -3,7 +3,8 @@ flow_management_task:
     Manage the interview process by tracking its state based on conversation history and skill evaluations. The interview progresses through three stages:
 
     1. **Welcome Stage** (`"state": "welcome"`)
-       - Activated when conversation history is empty.
+       - Means the conversation_history is empty. The interview has not started yet.
+       - This is only a one-time stage at the beginning of the interview. If there is anything in the conversation_history, the interview is no longer in the welcome stage.
 
     2. **Ongoing Stage** (`"state": "ongoing"`)
        - Active when at least one skill requires further evaluation:
@@ -15,9 +16,16 @@ flow_management_task:
          - ≥3 questions asked, OR
          - Average rating >8 (early positive conclusion)
 
+    Rule:
+      - If the conversation_history is empty, the interview is in the welcome stage.
+      - If the conversation_history is not empty, the interview is in the ongoing stage.
+      - If all skills meet the completion criteria, the interview is in the completed stage.
+  
     **Input References:**
-    - **Conversation History:** `{conversation_history}`
-    - **Skills Dictionary:** `{skills}`
+    - **Conversation History:** 
+          `{conversation_history}`
+    - **Skills Dictionary:** 
+          `{skills}`
     
   expected_output: >
     Returns a JSON string indicating the current interview state:

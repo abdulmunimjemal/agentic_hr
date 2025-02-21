@@ -1,5 +1,9 @@
 from pydantic_settings import BaseSettings
 from pydantic import Field, ValidationError
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class Settings(BaseSettings):
     MONGO_URI: str = Field(..., env="MONGO_URI")
@@ -8,6 +12,8 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = Field(..., env="OPENAI_API_KEY")
     MODEL: str = Field(..., env="MODEL")
     MAX_CONVERSATION_HISTORY: int = Field(6, env="MAX_CONVERSATION_HISTORY")
+    NOTIFICATION_SERVICE_URL: str = Field(..., env="NOTIFICATION_SERVICE_URL")
+    FRONTEND_BASE_URL: str = Field(..., env="FRONTEND_BASE_URL")
 
     class Config:
         env_file = ".env"         
@@ -17,5 +23,5 @@ class Settings(BaseSettings):
 try:
     settings = Settings()
 except ValidationError as e:
-    print("Configuration error:", e.json())
+    logger.error("Configuration error:", e.json())
     raise e

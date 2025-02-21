@@ -32,6 +32,8 @@ question_generation_task:
     Ensure all commas, brackets, and quotes are correctly placed to avoid parsing errors.
     The "skills" field must match the input provided.
 
+    DON'T ABSOLUTELY CHANGE THE SKILLS DICTIONARY. RETURN WHAT YOU RECEIVED FROM THE ANSWER EVALUATION TASK.
+
     FORMAT RULES:
     - Strict JSON compliance
     - No markdown/backticks

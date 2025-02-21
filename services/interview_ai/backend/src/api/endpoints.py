@@ -7,15 +7,16 @@ from uuid import uuid4
 from bson import ObjectId
 
 from src.api.config import settings
+from src.api.utils import send_email_notification
 from src.api.dependencies import get_mongo_db, get_redis_client
-from src.api.schemas import SessionData, SessionResponse, ChatRequest, ChatResponse, ChatState, ScheduleRequest, ScheduleResponse
+from src.api.schemas import SessionData, SessionResponse, ChatRequest, ChatResponse, ChatState, ScheduleRequest, ScheduleResponse, EmailType
 from src.interview_ai import unified_interface
 
 router = APIRouter()
 
 logger = logging.getLogger(__name__)
 
-
+FRONTEND_BASE_URL = settings.FRONTEND_BASE_URL # FOR EMAILS
 
 @router.post("/schedule", response_model=ScheduleResponse)
 async def schedule_interview(schedule_request: ScheduleRequest,
@@ -46,12 +47,27 @@ async def schedule_interview(schedule_request: ScheduleRequest,
         role_info=schedule_request.role_info,
         skills=transformed_skills,
         conversation_history=[],  # Initialize as empty
-        user_answer=""            # Default empty string
+        user_answer="",            # Default empty string
+        name=schedule_request.name,
+        user_email=schedule_request.user_email
     )
     
     try:
         result = await mongo_db.interviews.insert_one(session_data.model_dump())
         interview_id = str(result.inserted_id)
+        interview_link = f"{FRONTEND_BASE_URL}/interview/{interview_id}"
+        try:
+            result = send_email_notification(
+                    to=schedule_request.user_email,
+                    type=EmailType.interview_scheduled,
+                    subject="Your Interview has been Scheduled!",
+                    interview_link=interview_link,
+                    name=schedule_request.name,
+                    title=schedule_request.job_title,
+                )
+        except Exception as e:
+            logger.error(f"Failed to send email to {schedule_request.user_email}")
+
         return {"success": True, "interview_id": interview_id}
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -84,7 +100,8 @@ async def start_interview(interview_id: str,
             skills=interview_data["skills"],  # This should be a dict in the correct format.
             conversation_history=[],  # default empty list
             user_answer="", # default empty string
-            interview_id=interview_id
+            interview_id=interview_id,
+            user_email=interview_data["user_email"]
         )
     
     except KeyError as e:
@@ -159,6 +176,18 @@ async def chat(
         }
         await mongo_db.interview_results.insert_one(interview_results)
         redis_client.delete(chat_request.session_id)
+
+        # Send an email notification to the user
+        result = send_email_notification(
+            to=session_data.user_email,
+            subject="Your Interview has been Completed!",
+            type=EmailType.interview_completed,
+            name=session_data.name,
+        )
+
+        if not result:
+            logger.error(f"Failed to send interview completion email to {session_data.user_email}")
+
     elif state == "ongoing":
         session_data.skills = interviewer_result.get("skills", {})
 

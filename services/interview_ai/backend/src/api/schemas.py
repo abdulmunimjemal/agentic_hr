@@ -27,6 +27,7 @@ class SessionData(BaseModel):
     interview_id: str = ""
     user_email: EmailStr = ""
     name: str = ""
+    job_title: str = ""
 
 class ChatState(str, Enum):
     welcome = "welcome"

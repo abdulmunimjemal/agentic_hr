@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   interview_backend:
     build: ./services/interview_ai/backend
@@ -9,13 +7,15 @@ services:
       - mongo
       - redis
       - notification
+    env_file: .env
     environment:
       MONGO_URI: "mongodb://mongo:27017/"
       MONGO_DB: "interview_db"
       REDIS_URI: "redis://redis:6379"
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
       MODEL: "${MODEL}"
-      NOTIFICATION_SERVICE_URL: "http://notification:8000"  # Notification service URL
+      NOTIFICATION_SERVICE_URL: "http://notification:8000/api/v1/"  # Notification service URL
+      FRONTEND_BASE_URL: "http://localhost:3000"  # Client-side access via host port
     networks:
       - app_network
 
@@ -24,7 +24,8 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      - interview_backend
+    env_file: .env
     environment:
       NEXT_PUBLIC_API_BASE_URL: "http://localhost:8080/api/v1"  # Client-side access via host port
     networks:
@@ -39,6 +40,11 @@ services:
       - ./data/mongo:/data/db
     networks:
       - app_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
   redis:
     image: redis:latest
@@ -47,14 +53,31 @@ services:
       - "6379:6379"
     networks:
       - app_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
   notification:
     build: ./services/notification
     ports:
       - "8000:8000"  # Expose notification service port
+    env_file: .env
+    environment:
+      PORT: 8000
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SENDER_EMAIL: ${SENDER_EMAIL}
+      REDIS_URI: "redis://redis:6379/0"
     networks:
       - app_network
-
+    depends_on:
+      - redis  
+      
 networks:
   app_network:
     driver: bridge
+

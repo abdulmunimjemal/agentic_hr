@@ -49,7 +49,8 @@ async def schedule_interview(schedule_request: ScheduleRequest,
         conversation_history=[],  # Initialize as empty
         user_answer="",            # Default empty string
         name=schedule_request.name,
-        user_email=schedule_request.user_email
+        user_email=schedule_request.user_email,
+        job_title=schedule_request.job_title,
     )
     
     try:
@@ -101,7 +102,9 @@ async def start_interview(interview_id: str,
             conversation_history=[],  # default empty list
             user_answer="", # default empty string
             interview_id=interview_id,
-            user_email=interview_data["user_email"]
+            user_email=interview_data["user_email"],
+            name=interview_data["name"],
+            job_title=interview_data["job_title"],
         )
     
     except KeyError as e:
@@ -183,6 +186,7 @@ async def chat(
             subject="Your Interview has been Completed!",
             type=EmailType.interview_completed,
             name=session_data.name,
+            title=session_data.job_title
         )
 
         if not result:

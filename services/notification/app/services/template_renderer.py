@@ -22,6 +22,7 @@ def render_notification(notification: NotificationUnion) -> str:
         "interview_scheduled": "interview_scheduled.html",
         "interview_completed": "interview_completed.html",
         "text": "text.html",
+        'application_received': 'application_received.html',
     }
     
     try:
@@ -29,7 +30,7 @@ def render_notification(notification: NotificationUnion) -> str:
         template_name = template_map.get(notification.type)
         if not template_name:
             logger.warning("Unknown notification type: %s. Using default template.", notification.type)
-            template_name = "default_notification.html"  # Ensure this fallback template exists.
+            template_name = "default_.html"  # Ensure this fallback template exists.
 
         # Render the template with the notification's data.
         context = notification.model_dump()

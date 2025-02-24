@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /interview-ai
 
 # Copy dependency files
 COPY requirements.txt .

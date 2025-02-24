@@ -8,10 +8,10 @@ class Settings:
     # Server
     HOST: str = os.getenv("HOST", "0.0.0.0")
     PORT: int = int(os.getenv("PORT", 8000))
-    SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
-    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
-    SMTP_USER: str = os.getenv("SMTP_USERNAME", "")
-    SMTP_PASS: str = os.getenv("SMTP_PASSWORD", "")
+    SMTP_HOST: str = os.getenv("SMTP_HOST")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT"))
+    SMTP_USER: str = os.getenv("SMTP_USERNAME")
+    SMTP_PASS: str = os.getenv("SMTP_PASSWORD")
     SENDER_EMAIL: str = os.getenv("SMTP_FROM")
 
     def __init__(self):

@@ -6,6 +6,7 @@ class NotificationType(str, Enum):
     interview_scheduled = "interview_scheduled"
     interview_completed = "interview_completed"
     text = "text"
+    application_received = "application_received"
 
 from typing import Literal
 from pydantic import BaseModel, EmailStr
@@ -30,10 +31,15 @@ class TextNotification(BaseNotification):
     type: Literal[NotificationType.text]
     message: str
 
+class ApplicationReceivedNotification(BaseNotification):
+    type: Literal[NotificationType.application_received]
+    name: str
+    title: str  # Job title
 
 
 NotificationUnion = Union[
     InterviewScheduledNotification,
     InterviewCompletedNotification,
-    TextNotification
+    TextNotification,
+    ApplicationReceivedNotification
 ]

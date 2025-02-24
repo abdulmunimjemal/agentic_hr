@@ -1,13 +1,15 @@
-
 question_generation_task:
   description: >
-    Generate a personalized, ongoing response containing one question for the candidate.
-    Your task is to choose a single skill from the provided skills dictionary that has fewer than 3 questions asked so far.
-    If more than one skill qualifies, select the one with the lowest count.
-    The new question should be directly related to this skill and presented in a natural, conversational tone.
-    Briefly acknowledge the previous answer if needed—do not over-reference it—and avoid unnecessary details.
-    Use the latest Skills Dictionary from the Answer Evaluation Task output.
+    Generate a warm, friendly, and personalized response that includes one new question for the candidate. 
+    Use the candidate’s user info and role info to tailor your language naturally, avoiding generic phrasing or abrupt transitions. 
+    Acknowledge the candidate’s previous answer briefly if needed, but do not over-reference it or repeat details extensively. 
+    Choose a single skill from the provided skills dictionary that has fewer than 3 questions asked so far. If more than one skill meets this criterion, select the skill with the fewest questions asked. 
+    Formulate one direct, conversational question about that skill. 
+    Above all, sound human and relevant without being awkward or too formal.
 
+    IMPORTANT:
+    - Return the received skills dictionary exactly as it is (verbatim) from the Answer Evaluation Task. 
+    - Do not modify skill names, remove, or add any fields to the skills dictionary in your output.
 
     Reference for you:
       User Info:
@@ -18,49 +20,53 @@ question_generation_task:
         {conversation_history}
 
   expected_output: >
-    An "ongoing" state response containing a question for the candidate.
-    Expected Output format:
+    An "ongoing" state response containing a personalized question for the candidate.
 
+    FORMAT RULES:
+    1. Strict JSON compliance. 
+    2. No extra keys or text outside the JSON. 
+    3. Maintain the "skills" field as received—verbatim—from the Answer Evaluation Task.
+
+    Example output structure:
     {
       "state": "ongoing",
       "text": "A personalized question for the candidate.",
-      "skills": "The same as your input"
+      "skills": { ... the same dictionary you received ... }
     }
 
-    The output must strictly adhere to the JSON format above.
-    Do not include any additional text, such as "```json" or markdown formatting.
-    Ensure all commas, brackets, and quotes are correctly placed to avoid parsing errors.
-    The "skills" field must match the input provided.
-
-    DON'T ABSOLUTELY CHANGE THE SKILLS DICTIONARY. RETURN WHAT YOU RECEIVED FROM THE ANSWER EVALUATION TASK.
-
-    FORMAT RULES:
-    - Strict JSON compliance
-    - No markdown/backticks
-    - No omitted skills
-    
+    Do not include any additional text or formatting like "```json".
+  
   agent: question_generator
 
 
 answer_evaluation_task:
   description: >
-    Evaluate the user's answer with objectivity and precision. Update the skills dictionary accordingly by assessing whether the answer provides specific, relevant evidence of expertise aligned with the job's requirements. In your evaluation, ensure that general or vague answers do not receive a high score.
+    Read the user's most recent answer and evaluate how well it addresses each relevant skill. 
+    Update the skills dictionary by adjusting the score for any skill that the user’s answer pertains to. 
+    Use the following scoring criteria:
 
-    For each skill in the skills dictionary, compare the user's answer against the required level of expertise. Use the following criteria to assign a score:
-    
-    1. 1-3: Poor  
-       - The answer is minimal, vague, or off-topic, showing little to no evidence of the required skill.
-    
-    2. 4-6: Average  
-       - The answer contains some relevant points but remains generic or lacks depth and detailed examples.
-    
-    3. 7-9: Good  
-       - The answer is specific, detailed, and demonstrates a solid understanding of the skill, with clear examples or reasoning.
-    
-    4. 10: Excellent match for the job  
-       - The answer is highly specific, thoroughly detailed, and directly addresses the required skill with concrete evidence and examples.
+    1. 1–3: Poor  
+       - The response is off-topic, too brief, or does not demonstrate the skill adequately.
+    2. 4–6: Average  
+       - The answer includes some relevant points but lacks detail or specificity.
+    3. 7–9: Good  
+       - The candidate offers detailed and specific evidence of competence in the skill.
+    4. 10: Excellent  
+       - The response fully demonstrates deep expertise with clear, relevant examples.
 
-    Emphasize consistency by focusing on clarity, specificity, and relevance. Ensure that any high rating is only given when the answer explicitly addresses the required expertise rather than generic statements.
+    SPECIAL RULE:
+    - If the user explicitly states they have no experience with a skill, assign that skill a score of 1–3 and increment the number of questions asked for that skill by 3.
+
+    For every skill that you decide to update:
+    - Increment its "number_of_questions" by 1.
+    - Update its "score" based on the criteria above.
+    - Add or update an "evidence" field containing a concise reason for the assigned score. If there was previous reasoning for this skill, incorporate it briefly but remain succinct.
+
+    IMPORTANT:
+    - Do NOT add new skills not in the dictionary. 
+    - Return ALL skills in the dictionary, even if some are not updated. 
+    - Preserve unmodified fields (e.g., "required_level") exactly as they are. 
+    - Keep JSON compliance strict. No additional text or formatting.
 
     Recent Conversation History:
       {conversation_history}
@@ -71,38 +77,31 @@ answer_evaluation_task:
     Skills Dictionary:
       {skills}
 
-    Special Rule: If the user admits he has no experience in a particular skill, assign a score of 1-3 and increment the number of questions asked for that skill by three.
-
-    WARNING: DON'T ADD ANY ADDITIONAL SKILL NOT PRESENT IN THE SKILLS DICTIONARY! ONLY EVALUATE THOSE PRESENT IN THE SKILLS DICTIONARY.
-    UPDATE ONLY THE SKILLS RELATED TO THE ANSWER PROVIDED BY THE USER AND THE QUESTION ASKED. DO NOT UPDATE THE WHOLE SKILLS DICTIONARY.
-    INCREMENT THE NUMBER OF QUESTIONS ASKED FOR THE SKILL BY ONE.
-  
   expected_output: >
-    An updated skills dictionary (JSON).
-
-    Expected Output format:
-          {
-            "skills": {
-              "skill_1": {
-                "score": (updated integer),
-                "required_level": "(unchanged string)",
-                "number_of_questions": (incremented integer),
-              },
-              // ALL original skills must appear here
-            }
-          }
-
-    CONSTRAINTS:
-    !!! CRITICAL !!!
-    - Preservation: Maintain original skill names/keys
-    - Completeness: Output ALL skills regardless of updates
-    - Specificity: Require direct evidence for scores ≥7
-
+    Updated skills JSON. 
     FORMAT RULES:
-    - Strict JSON compliance
-    - No markdown/backticks
-    - No omitted skills
+    1. Strict JSON compliance (no backticks, no YAML).
+    2. Maintain the exact key structure for each skill. 
+    3. Include all original skills, whether updated or not.
+    4. For each updated skill, include "score", "required_level", "number_of_questions", and "evidence".
+
+    Example Output:
+    {
+      "skills": {
+        "skill_1": {
+          "score": 5,
+          "required_level": "...",
+          "number_of_questions": 2,
+          "evidence": "Concise reason incorporating any previous reasoning here."
+        },
+        "skill_2": {
+          "score": ...,
+          "required_level": "...",
+          "number_of_questions": ...,
+          "evidence": "..."
+        },
+        ...
+      }
+    }
 
   agent: answer_evaluator
-
-

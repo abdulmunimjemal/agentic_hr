@@ -1,7 +1,7 @@
 FROM python:3.10-slim
 
 # Set a working directory
-WORKDIR /app
+WORKDIR /notification
 
 # Copy requirements first for caching
 COPY requirements.txt .

@@ -1,0 +1,23 @@
+# Use an official Node.js runtime as the base image
+FROM node:18-alpine
+
+# Set the working directory
+WORKDIR /interview-ai
+
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
+
+# Install dependencies using NPM
+RUN npm ci
+
+# Copy the rest of the application code
+COPY . .
+
+# Build the Next.js application
+# RUN npm run buil
+
+# Expose the port that Next.js listens on
+EXPOSE 3000
+
+# Start the Next.js application in production mode
+CMD ["npm", "run", "dev"]

@@ -14,10 +14,6 @@ class Settings(BaseSettings):
     MAX_CONVERSATION_HISTORY: int = Field(6, env="MAX_CONVERSATION_HISTORY")
     NOTIFICATION_SERVICE_URL: str = Field(..., env="NOTIFICATION_SERVICE_URL")
     FRONTEND_BASE_URL: str = Field(..., env="FRONTEND_BASE_URL")
-
-    class Config:
-        env_file = ".env"         
-        env_file_encoding = "utf-8"
         
 
 try:

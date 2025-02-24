@@ -9,7 +9,7 @@ question_generation_task:
 
     IMPORTANT:
     - Return the received skills dictionary exactly as it is (verbatim) from the Answer Evaluation Task. 
-    - Do not modify skill names, remove, or add any fields to the skills dictionary in your output.
+    - DO NOT modify skill names, remove, or add any fields to the skills dictionary in your output.
 
     Reference for you:
       User Info:
@@ -63,7 +63,7 @@ answer_evaluation_task:
     - Add or update an "evidence" field containing a concise reason for the assigned score. If there was previous reasoning for this skill, incorporate it briefly but remain succinct.
 
     IMPORTANT:
-    - Do NOT add new skills not in the dictionary. 
+    - DO NOT add any skill not in the dictionary even if they are mentioned in the user's answer.
     - Return ALL skills in the dictionary, even if some are not updated. 
     - Preserve unmodified fields (e.g., "required_level") exactly as they are. 
     - Keep JSON compliance strict. No additional text or formatting.

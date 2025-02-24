@@ -68,8 +68,8 @@ export default function ApplyForm({ jobId }: ApplyFormProps) {
 
       // Redirect after showing success animation
       setTimeout(() => {
-        window.location.href = `/results/${application_id}`;
-      }, 2500);
+        window.location.href = `/`;
+      }, 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Application failed');
     } finally {

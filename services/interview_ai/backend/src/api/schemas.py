@@ -52,13 +52,6 @@ class ScheduleRequest(BaseModel):
     user_email: EmailStr
     role_info: str
     job_title: str
-    # The input skills dict only provides 'required_level' for each skill.
-    # Example:
-    # {
-    #   "skill_1": {"required_level": "advanced"},
-    #   "skill_2": {"required_level": "intermediate"},
-    #   "skill_3": {"required_level": "beginner"}
-    # }
     skills: Dict[str, dict]
 
 class ScheduleResponse(BaseModel):

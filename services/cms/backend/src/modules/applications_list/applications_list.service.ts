@@ -1,43 +1,78 @@
+// applications_list.service.ts
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { ApplicationsService } from '../applications/applications.service';
+import { ScreeningResultsService } from '../screening-results/screening-results.service';
+import { InterviewsService } from '../interviews/interviews.service';
+import { InterviewResultsService } from '../interview-results/interview-results.service';
 import { ApplicationsList } from './schema/applications_list.schema';
-import { CreateApplicationsListDto } from './dto/create-applications_list.dto';
-import { UpdateApplicationsListDto } from './dto/update-applications_list.dto';
+import { Application } from '../applications/schemas/application.schema';
 
 @Injectable()
 export class ApplicationsListService {
   constructor(
-    @InjectModel(ApplicationsList.name)
-    private applicationsListModel: Model<ApplicationsList>,
+    private readonly applicationsService: ApplicationsService,
+    private readonly screeningResultService: ScreeningResultsService,
+    private readonly interviewsService: InterviewsService,
+    private readonly interviewResultsService: InterviewResultsService,
   ) {}
 
-  async create(dto: CreateApplicationsListDto): Promise<ApplicationsList> {
-    const newDoc = new this.applicationsListModel(dto);
-    return newDoc.save();
-  }
+  async findByJobId(jobId: number): Promise<Partial<ApplicationsList>[]> {
+    // 1. Fetch all applications for the given job id
+    const applications: Application[] = await this.applicationsService.findByJobId(jobId);
 
-  async findAll(): Promise<ApplicationsList[]> {
-    return this.applicationsListModel.find().exec();
-  }
+    // 2. For each application, gather data from the other services
+    const unifiedApplications = await Promise.all(
+      applications.map(async (app) => {
+        // --- Screening Result ---
+        let screeningResult;
+      
+        try {
+          // Using the application's _id (converted to string) as the identifier
+          screeningResult = await this.screeningResultService.findOne(app._id.toString());
+        } catch (err) {
+          screeningResult = null;
+        }
 
-  async findOne(jobId: number): Promise<ApplicationsList> {
-    return this.applicationsListModel.findOne({ job_id: jobId }).exec();
-  }
+        // --- Interview ---
+        let interview;
+        try {
+          interview = await this.interviewsService.findOne(app._id.toString());
+        } catch (err) {
+          interview = null;
+        }
 
-  async update(
-    jobId: number,
-    updateDto: UpdateApplicationsListDto,
-  ): Promise<ApplicationsList> {
-    return this.applicationsListModel
-      .findOneAndUpdate({ job_id: jobId }, updateDto, { new: true })
-      .exec();
-  }
+        // --- Interview Result ---
+        let interviewResult;
+        if (interview && interview.interview_id) {
+          try {
+            interviewResult = await this.interviewResultsService.findOne(interview.interview_id);
+          } catch (err) {
+            interviewResult = null;
+          }
+        }
 
-  async remove(jobId: number): Promise<{ deleted: boolean }> {
-    const result = await this.applicationsListModel
-      .findOneAndDelete({ job_id: jobId })
-      .exec();
-    return { deleted: !!result };
+        // --- Build the unified response object ---
+        const unifiedApp: Partial<ApplicationsList> = {
+          job_id: app.job_id,
+          name: app.name,
+          app_id: app._id.toString(),
+          cv: app.cv,
+          hiring_decision: interviewResult ? interviewResult.hiring_decision : '',
+          date: app.appliedDate, // using appliedDate as the date field
+          reasoning: {
+            screening: screeningResult && screeningResult.score ? [screeningResult.score] : [],
+            // Wrap the interview reasoning in an array if available
+            interview: interviewResult && interviewResult.score ? [interviewResult.score] : [],
+          },
+          screeningStatus: screeningResult ? 'completed' : 'pending',
+          // If an interview is found then "invited"; if an interview result is also found then "completed"
+          interviewStatus: interview ? (interviewResult ? 'completed' : 'invited') : 'pending',
+        };
+
+        return unifiedApp;
+      }),
+    );
+
+    return unifiedApplications;
   }
 }

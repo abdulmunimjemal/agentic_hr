@@ -12,7 +12,7 @@ WORKDIR /interview-ai
 COPY requirements.txt .
 
 # Install project dependencies
-RUN pip install -r requirements.txt --no-cache-dir
+RUN pip install -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .

@@ -26,6 +26,10 @@ export class ApplicationsService {
     return this.applicationModel.findOne({ job_id: jobId }).exec();
   }
 
+  async findByJobId(jobId: number): Promise<Application[]> {
+    return this.applicationModel.find({ job_id: jobId }).exec();
+  }
+
   // Update by job_id
   async update(jobId: number, updateDto: UpdateApplicationDto): Promise<Application> {
     return this.applicationModel.findOneAndUpdate({ job_id: jobId }, updateDto, {

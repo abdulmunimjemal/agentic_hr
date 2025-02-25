@@ -14,7 +14,7 @@ export class ScreeningResult extends Document {
   skills?: Record<string, any>;
 
   @Prop([String])
-  reasoning?: string[];
+  reasoning?: string;
 
   @Prop({ type: Object })
   parsed_cv?: Record<string, any>;

@@ -21,8 +21,15 @@ export class ScreeningResultsService {
     return this.screeningResultModel.find().exec();
   }
 
-  async findOne(id: string): Promise<ScreeningResult> {
-    return this.screeningResultModel.findById(id).exec();
+  async findOne(id: string): Promise<any> {
+    const result = await this.screeningResultModel.findOne( {app_id: id} ).exec();
+    const modifiedResult = {
+      ...result.toObject(), // Ensure it's a plain object
+      reasoning: JSON.stringify(result.reasoning),
+    };
+    
+    console.log(modifiedResult);
+    return modifiedResult;
   }
 
   async update(id: string, updateDto: UpdateScreeningResultDto): Promise<ScreeningResult> {

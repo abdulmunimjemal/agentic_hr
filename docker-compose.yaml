@@ -1,4 +1,39 @@
 services:
+
+  cms_backend:
+    build: ./services/cms/backend
+    container_name: CMSBackend
+    ports:
+      - "${CMS_BACKEND_PORT}:3000"
+    depends_on:
+      - mongo
+      - redis
+      - notification
+    env_file: .env
+    environment:
+      PORT: 3000
+      MONGO_URI: "mongodb://mongo:27017/hr_db"
+      MONGO_DB: "hr_db"
+      MONGO_INITDB_DATABASE: "hr_db"
+      REDIS_URI: "redis://redis:6379"
+      NOTIFICATION_SERVICE_URL: "http://notification:${NOTIFICATION_PORT}/api/v1/"
+      FRONTEND_BASE_URL: "http://localhost:${CMS_FRONTEND_PORT}"
+    networks:
+      - app_network
+    
+  cms_frontend:
+    build: ./services/cms/frontend
+    container_name: CMSFrontend
+    ports:
+      - "${CMS_FRONTEND_PORT}:3000"
+    depends_on:
+      - cms_backend
+    env_file: .env
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:${CMS_BACKEND_PORT}"
+    networks:
+      - app_network
+    
   interview_backend:
     build: ./services/interview_ai/backend
     container_name: InterviewBackend
@@ -19,6 +54,9 @@ services:
       FRONTEND_BASE_URL: "http://localhost:${INTERVIEW_FRONTEND_PORT}"
     networks:
       - app_network
+    volumes:
+      - shared_volume:/shared_volume  # Added shared volume
+
 
   interview_frontend:
     build: ./services/interview_ai/frontend
@@ -32,27 +70,6 @@ services:
       NEXT_PUBLIC_API_BASE_URL: "http://localhost:8080/api/v1"
     networks:
       - app_network
-
-  # CMS Service with shared volume
-  cms:
-    build: ./services/cms
-    container_name: CMS
-    env_file: .env
-    ports:
-      - "${CMS_PORT}:3000"
-    depends_on:
-      - mongo
-      - notification
-    environment:
-      MONGO_URI: "mongodb://mongo:27017/hr_db"
-      MONGO_INITDB_DATABASE: "hr_db"
-      NOTIFICATION_SERVICE_URL: "http://notification:8000/api/v1/"
-      PORT: 3000
-    volumes:
-      - shared_volume:/shared_volume  # Added shared volume
-    networks:
-      - app_network
-      
 
   # Screening Microservice
   screening_api:

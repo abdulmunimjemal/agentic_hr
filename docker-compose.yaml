@@ -98,7 +98,7 @@ services:
 
   screening_consumer:
     build: ./services/screening/screener
-    command: python consumer.py
+    command: python rabbitMQ/consumer.py
     container_name: ScreeningConsumer
     env_file: .env
     environment:

@@ -1,11 +1,17 @@
 from pymongo import MongoClient
 import os
 
-MONGO_URI = os.getenv("MONGODB_URI", "mongodb+srv://yohannesaabdi:yohannes6460@cluster0.78zf8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+class Database:
+    def __init__(self):
+        mongo_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/hr_db")
+        self.client = MongoClient(mongo_uri)
+        self.db = self.client.hr_db
+        self.results_collection = self.db["screening_results"]
+        self.job_collection = self.db["jobs"]
+        self.applications_collection = self.db["applications"]
 
-client = MongoClient(MONGO_URI)
+    def get_collection(self, name):
+        return self.db[name]
 
-db = client.hr_db
-results_collection = db["screening_results"]
-job_collection = db["jobs"]
-applications_collection = db["applications"]
+# Create a single instance of the database to be used across the application
+database = Database()

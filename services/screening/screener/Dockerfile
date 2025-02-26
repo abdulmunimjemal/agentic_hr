@@ -21,7 +21,7 @@ RUN python -m nltk.downloader punkt stopwords wordnet omw-1.4
 RUN python -c "import nltk; nltk.download('punkt_tab')"
 
 # Copy application code
-COPY /app .
+COPY . .
 
 # Create shared volume directory
 RUN mkdir -p /shared_volume
@@ -32,4 +32,4 @@ ENV POPPLER_PATH=/usr/bin
 
 EXPOSE 9000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9000"]

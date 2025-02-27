@@ -1,22 +1,7 @@
-# api/schemas.py
-
-from typing import List, Dict
-from enum import Enum
+# models/schemas.py
+from .enums import ChatState
 from pydantic import BaseModel, Field, EmailStr
-
-
-class RequiredLevel(str, Enum):
-    expert = "expert"
-    intermediate = "intermediate"
-    beginner = "beginner"
-
-
-class Skill(BaseModel):
-    required_level: RequiredLevel
-    rating: int = 0
-    questions_asked: int = 0
-    weight: int = 10
-
+from typing import List, Dict
 
 class SessionData(BaseModel):
     conversation_history: List[str] = Field(default_factory=list)
@@ -29,14 +14,6 @@ class SessionData(BaseModel):
     name: str = ""
     job_title: str = ""
 
-class ChatState(str, Enum):
-    welcome = "welcome"
-    ongoing = "ongoing"
-    completed = "completed"
-
-class SessionResponse(BaseModel):
-    session_id: str
-
 class ChatRequest(BaseModel):
     session_id: str
     user_answer: str
@@ -44,7 +21,8 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     state: ChatState
     text: str
-
+    success: bool
+    error: str = None
 
 class ScheduleRequest(BaseModel):
     name: str
@@ -59,8 +37,9 @@ class ScheduleResponse(BaseModel):
     interview_id: str = None
     error: str = None
 
-class EmailType(str, Enum):
-    interview_scheduled = "interview_scheduled"
-    interview_completed = "interview_completed"
-    text = "text"
 
+class SessionResponse(BaseModel):
+    interview_id: str
+    chat_history: List[str] = []
+    success: bool
+    error: str = None
